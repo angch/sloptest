@@ -26,7 +26,7 @@ pub const AdoptionRequest = struct {
         var stmt = try db.prepare(sql);
         defer stmt.deinit();
 
-        var list = std.ArrayList(AdoptionRequest).init(allocator);
+        var list: std.ArrayList(AdoptionRequest) = .empty;
 
         while (try stmt.step()) {
             const req = AdoptionRequest{
@@ -44,10 +44,10 @@ pub const AdoptionRequest = struct {
                 .notes = try allocator.dupe(u8, stmt.getColumnText(11)),
                 .created_at = try allocator.dupe(u8, stmt.getColumnText(12)),
             };
-            try list.append(req);
+            try list.append(allocator, req);
         }
 
-        return list.toOwnedSlice();
+        return list.toOwnedSlice(allocator);
     }
 
     pub fn create(allocator: std.mem.Allocator, pet_id: i64, applicant_name: []const u8, email: []const u8, phone: []const u8, housing_type: []const u8, has_yard: bool, other_pets: []const u8, experience: []const u8) !i64 {

@@ -72,7 +72,7 @@ pub const Pet = struct {
         var stmt = try db.prepare(sql_z);
         defer stmt.deinit();
 
-        var pets_list = std.ArrayList(Pet).init(allocator);
+        var pets_list: std.ArrayList(Pet) = .empty;
 
         while (try stmt.step()) {
             const pet = Pet{
@@ -89,10 +89,10 @@ pub const Pet = struct {
                 .location = try allocator.dupe(u8, stmt.getColumnText(10)),
                 .created_at = try allocator.dupe(u8, stmt.getColumnText(11)),
             };
-            try pets_list.append(pet);
+            try pets_list.append(allocator, pet);
         }
 
-        return pets_list.toOwnedSlice();
+        return pets_list.toOwnedSlice(allocator);
     }
 
     pub fn create(allocator: std.mem.Allocator, name: []const u8, species: []const u8, breed: []const u8, age: i64, gender: []const u8, size: []const u8, description: []const u8, image_url: []const u8, location: []const u8) !i64 {

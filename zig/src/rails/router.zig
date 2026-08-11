@@ -16,17 +16,17 @@ pub const Router = struct {
 
     pub fn init(allocator: std.mem.Allocator) Router {
         return Router{
-            .routes = std.ArrayList(Route).init(allocator),
+            .routes = .empty,
             .allocator = allocator,
         };
     }
 
     pub fn deinit(self: *Router) void {
-        self.routes.deinit();
+        self.routes.deinit(self.allocator);
     }
 
     pub fn get(self: *Router, pattern: []const u8, action: ActionFn) !void {
-        try self.routes.append(Route{
+        try self.routes.append(self.allocator, Route{
             .method = "GET",
             .pattern = pattern,
             .action = action,
@@ -34,7 +34,7 @@ pub const Router = struct {
     }
 
     pub fn post(self: *Router, pattern: []const u8, action: ActionFn) !void {
-        try self.routes.append(Route{
+        try self.routes.append(self.allocator, Route{
             .method = "POST",
             .pattern = pattern,
             .action = action,

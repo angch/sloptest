@@ -44,10 +44,10 @@ pub const Response = struct {
     }
 
     pub fn toRawHttp(self: *const Response, allocator: std.mem.Allocator) ![]const u8 {
-        var buf = std.ArrayList(u8).init(allocator);
-        errdefer buf.deinit();
+        var buf: std.ArrayList(u8) = .empty;
+        defer buf.deinit(allocator);
 
-        const writer = buf.writer();
+        const writer = buf.writer(allocator);
 
         try writer.print("HTTP/1.1 {d} {s}\r\n", .{ self.status, self.status_text });
         try writer.print("Content-Type: {s}\r\n", .{self.content_type});
@@ -60,7 +60,7 @@ pub const Response = struct {
         try writer.writeAll("Connection: close\r\n\r\n");
         try writer.writeAll(self.body);
 
-        return buf.toOwnedSlice();
+        return buf.toOwnedSlice(allocator);
     }
 
     pub fn deinit(self: *Response) void {

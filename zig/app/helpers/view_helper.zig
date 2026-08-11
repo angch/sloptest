@@ -9,10 +9,10 @@ pub fn speciesEmoji(species: []const u8) []const u8 {
 }
 
 pub fn renderLayout(allocator: std.mem.Allocator, title: []const u8, content: []const u8, active_nav: []const u8) ![]const u8 {
-    var buf = std.ArrayList(u8).init(allocator);
-    errdefer buf.deinit();
+    var buf: std.ArrayList(u8) = .empty;
+    defer buf.deinit(allocator);
 
-    const writer = buf.writer();
+    const writer = buf.writer(allocator);
 
     try writer.writeAll(
         \\<!DOCTYPE html>
@@ -96,5 +96,5 @@ pub fn renderLayout(allocator: std.mem.Allocator, title: []const u8, content: []
         \\</html>
     );
 
-    return try buf.toOwnedSlice();
+    return try buf.toOwnedSlice(allocator);
 }

@@ -93,24 +93,24 @@ fn putOrReplace(map: *std.StringHashMap([]const u8), key: []const u8, val: []con
 }
 
 fn urlDecode(allocator: std.mem.Allocator, input: []const u8) ![]const u8 {
-    var out = std.ArrayList(u8).init(allocator);
-    errdefer out.deinit();
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(allocator);
 
     var i: usize = 0;
     while (i < input.len) {
         if (input[i] == '+') {
-            try out.append(' ');
+            try out.append(allocator, ' ');
             i += 1;
         } else if (input[i] == '%' and i + 2 < input.len) {
             const hex = input[i + 1 .. i + 3];
             const byte = std.fmt.parseInt(u8, hex, 16) catch ' ';
-            try out.append(byte);
+            try out.append(allocator, byte);
             i += 3;
         } else {
-            try out.append(input[i]);
+            try out.append(allocator, input[i]);
             i += 1;
         }
     }
 
-    return out.toOwnedSlice();
+    return out.toOwnedSlice(allocator);
 }
